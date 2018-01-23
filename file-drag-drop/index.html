@@ -136,7 +136,8 @@
         }
 
         function removePreviewImage(event) {
-            event.target.closest('li').remove()
+            event.target.closest('li').remove();
+            if(!previewWrapperUlElement.children.length) previewWrapperElement.style.display = 'none';
         }
 
         function drag_over_handler(ev) {
