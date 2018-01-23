@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>File Drag and Drop | Snippets</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0px;
+        }
+        .dropzone__wrapper {
+            width: 80%;
+            margin: 0 auto;
+        }
+        .dropzone__container {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            border: 2px solid red;
+            width: 100%;
+            min-height: 200px;
+        }
+        .dropzone__text {
+            margin: 0px auto;
+            font-weight: 800;
+        }
+        
+        .dropzone__preview-wrapper {
+            display: none;
+            margin: 30px 0;
+        }
+        .dropzone__preview-wrapper .dropzone__preview-heading {
+            text-transform: uppercase;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .dropzone__preview-wrapper .dropzone__preview-container {
+            border: 2px solid green;
+            min-height: 200px;
+        }
+        .dropzone__preview-wrapper .dropzone__preview-container > ul {
+            display: block;
+            width: 100%;
+            padding: 0;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .dropzone__preview-wrapper .dropzone__preview-container > ul > li {
+            position: relative;
+            display: inline-block;
+            border: 2px solid black;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 10px;
+        }
+        .dropzone__preview-wrapper .dropzone__preview-container > ul > li img {
+            width: 200px;
+            height: 200px;
+        }
+        .dropzone__preview-wrapper .dropzone__preview-container .dropzone__preview__btn-close {
+            position: absolute;
+            top: 8px;
+            right: 5px;
+            background: rgba(0,0,0,1);
+            border-radius: 50%;
+            padding: 4px;
+            font-size: 10px;
+            color: white;
+            font-family: sans-serif;
+            cursor: pointer;
+
+        }
+    </style>
+    <div class="dropzone__wrapper">
+        <div id="dropzone__container" class="dropzone__container" ondrop="file_drop_handler(event)" ondragover="drag_over_handler(event)" ondragend="dragend_handler(event)" data-file-limit="7">
+            <div class="dropzone__text">Drag one or more files to this drop zone...</div>
+        </div>
+        <div class="dropzone__preview-wrapper">
+            <div class="dropzone__preview-heading">Preview</div>
+            <div class="dropzone__preview-container">
+                <ul>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZoneElement = document.getElementById('drop_zone');
+        const fileDropLimit = (dropZoneElement) ? dropZoneElement.getAttribute('data-file-limit') : 7;
+        const previewWrapperElement = document.querySelector('.dropzone__preview-wrapper');
+        const previewWrapperUlElement = document.querySelector('.dropzone__preview-container').children[0];
+
+        function file_drop_handler(event) {
+            event.preventDefault();
+            let dt = event.dataTransfer;
+            let files = dt.files;
+            Array.from(files).forEach(file => {
+                let reader = new FileReader();
+                reader.readAsDataURL(file);
+
+                reader.onload = fileEvent => {
+                    let totalPreviewLength = previewWrapperUlElement.children.length;
+                    if(totalPreviewLength === fileDropLimit) {
+                        alert(`You have reached the maximum ${fileDropLimit} file upload limit.`);
+                        return false;    
+                    } 
+
+                    createPreviewImageElement(fileEvent, previewWrapperUlElement);
+
+                    if(previewWrapperElement.style.display === 'none' || previewWrapperElement.style.display === '' || previewWrapperElement.style.display === 'undefined' ) previewWrapperElement.style.display = 'block';
+                };
+            });
+        }
+
+        function createPreviewImageElement(fileEvent, targetElement) {
+            let liElem = document.createElement('li');
+            let imgElem = document.createElement('img');
+            imgElem.src = fileEvent.target.result;
+            liElem.appendChild(imgElem);
+            let spanElem = document.createElement('span');
+            spanElem.innerHTML = 'X';
+            spanElem.className = "dropzone__preview__btn-close";
+            // Add remove event listener
+            spanElem.addEventListener('click', (e) => {
+              removePreviewImage(e);
+            });
+            liElem.appendChild(spanElem);
+            targetElement.appendChild(liElem);
+        }
+
+        function removePreviewImage(event) {
+            event.target.closest('li').remove()
+        }
+
+        function drag_over_handler(ev) {
+            ev.preventDefault();
+        }
+
+        function dragend_handler(ev) {
+            // Remove all of the drag data
+            var dt = ev.dataTransfer;
+            if (dt.items) {
+                // Use DataTransferItemList interface to remove the drag data
+                for (var i = 0; i < dt.items.length; i++) {
+                dt.items.remove(i);
+                }
+            } else {
+                // Use DataTransfer interface to remove the drag data
+                ev.dataTransfer.clearData();
+            }
+        }
+
+    </script>
+
+</body>
+</html>
